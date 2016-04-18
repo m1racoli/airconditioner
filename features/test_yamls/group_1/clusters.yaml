@@ -1,0 +1,5 @@
+#CLUSTERS YAML
+#Logical grouping of tasks
+
+bookings:
+    - fill_bookings

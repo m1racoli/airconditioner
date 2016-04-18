@@ -358,3 +358,28 @@ def step_impl(context, dag_id, task_a, task_b):
     task_b = get_task(dag, task_b)
     assert_does_not_contain(task_a.downstream_list, task_b)
     assert_does_not_contain(task_b.upstream_list, task_a)
+
+
+@given('I have a set of YAMLs located at "{path}"')
+def step_impl(context, path):
+    """
+    :type path: str
+    :type context: behave.runner.Context
+    """
+    context.path = path
+
+
+@when("I build the DAGs from those YAMLs")
+def step_impl(context):
+    """
+    :type context: behave.runner.Context
+    """
+    context.dags = DAGBuilder(path=context.path).build()
+
+
+@then("I have the DAG defined in the YAMLs")
+def step_impl(context):
+    """
+    :type context: behave.runner.Context
+    """
+    pass

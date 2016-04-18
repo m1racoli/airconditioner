@@ -85,8 +85,14 @@ class TimeDelta(object):
 
 
 class GameConfig(Config):
-    def __init__(self, game=None, conf=None, parent=None):
-        file_path = path.join(super(GameConfig, self)._base_path, 'games.yaml') if conf is None else None
+    def __init__(self, game=None, conf=None, parent=None, path=None):
+        file_path = None
+        if conf is None:
+            if path is None:
+                file_path = path.join(super(GameConfig, self)._base_path, 'games.yaml')
+            else:
+                file_path = ''
+
         super(GameConfig, self).__init__(file_path=file_path, conf=conf)
 
         if game is not None:
@@ -275,7 +281,7 @@ class DepConfig(Config):
 
 
 class DAGBuilder(object):
-    def __init__(self, conf=None):
+    def __init__(self, conf=None, path=None):
         """
         :param conf:
         :type: Configuration
@@ -285,6 +291,11 @@ class DAGBuilder(object):
             self.deps_config = DepConfig(conf=conf.dependencies)
             self.cluster_config = ClusterConfig(conf=conf.clusters)
             self.task_config = TaskConfig(conf=conf.tasks)
+        elif path is not None:
+            self.game_config = GameConfig(path=path)
+            self.deps_config = DepConfig()
+            self.cluster_config = ClusterConfig()
+            self.task_config = TaskConfig()
         else:
             self.game_config = GameConfig()
             self.deps_config = DepConfig()
