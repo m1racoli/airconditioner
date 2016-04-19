@@ -1,11 +1,24 @@
 from os import path
 
 from configure import Configuration, ConfigurationError
+from datetime import datetime
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.exasol_operator import ExasolOperator
 from airflow.operators.sensors import TimeDeltaSensor, SleepSensor, SqlSensor, ExternalTaskSensor
 import logging
+
+
+def date_to_datetime(args):
+    if args.get('start_date'):
+        print type(args['start_date'])
+        d = args['start_date']
+        args['start_date'] = datetime(d.year, d.month, d.day)
+    if args.get('end_date'):
+        d = args['end_date']
+        args['end_date'] = datetime(d.year, d.month, d.day)
+
+    return args
 
 
 class Config(object):
@@ -138,7 +151,7 @@ class GameConfig(Config):
         args = self.conf.get('default_args', {}) or {}
         default_args.update(args)
 
-        return default_args
+        return date_to_datetime(default_args)
 
 
 class ClusterConfig(Config):
@@ -168,14 +181,13 @@ class TaskConfig(Config):
     def __init__(self, conf=None, yaml_path=None):
         file_name = 'tasks.yaml' if conf is None else None
         super(TaskConfig, self).__init__(file_name=file_name, conf=conf, yaml_path=yaml_path)
-        print self.conf
 
     def compile_tasks(self, dag, game_config, deps_config, cluster_config):
         tasks = {}
         time_delta = TimeDelta(dag)
 
         for cluster, cluster_options in game_config.clusters.items():
-            cluster_options = cluster_options or {}
+            cluster_options = date_to_datetime(cluster_options or {})
             for task_id in cluster_config.get_tasks(cluster):
                 if not dag.has_task(task_id):
                     result = self.resolve(dag, task_id, game_config, cluster_options)

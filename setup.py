@@ -13,5 +13,8 @@ setup(
         "behave",
         "configure",
         "airflow",
-    ]
+    ],
+    extras_require={
+        'dev': ['pyyaml']
+    }
 )

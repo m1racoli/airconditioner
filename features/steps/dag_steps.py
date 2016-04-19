@@ -4,22 +4,24 @@ from datetime import datetime
 
 from airconditioner import DAGBuilder, task_types
 
+import yaml
+
 
 @given(u'We have an empty configuration')
 def step_impl(context):
-    context.dag_config = Configuration.from_dict(
-        {
-            'clusters': {},
-            'dependencies': {},
-            'games': {},
-            'tasks': {},
-        }
-    )
+    context.dag_config = {
+        'clusters': {},
+        'dependencies': {},
+        'games': {},
+        'tasks': {},
+    }
 
 
 @when(u'I build the DAGs')
 def step_impl(context):
-    context.dags = DAGBuilder(conf=context.dag_config).build()
+    yaml_string = yaml.safe_dump(context.dag_config, default_style='"').replace('"', '')
+    config = Configuration.from_string(yaml_string)
+    context.dags = DAGBuilder(conf=config).build()
 
 
 @then(u'There are no DAGs')
@@ -342,7 +344,7 @@ def step_impl(context, task_id, profile, platform, key, value):
         profile_config[platform] = {}
         platform_config = profile_config[platform]
 
-    platform_config.update(Configuration.from_string("%s: %s" % (key, value)))
+    platform_config[key] = value
 
 
 @step('In the DAG "{dag_id}" the task "{task_a}" is not dependency of "{task_b}"')
@@ -375,3 +377,17 @@ def step_impl(context):
     :type context: behave.runner.Context
     """
     context.dags = DAGBuilder(yaml_path=context.path).build()
+
+
+@then('The attribute "{attr}" of the task "{task_id}" in DAG "{dag_id}" is of type "{value_type}"')
+def step_impl(context, attr, task_id, dag_id, value_type):
+    """
+    :type attr: str
+    :type task_id: str
+    :type game_id: str
+    :type value_type: str
+    :type context: behave.runner.Context
+    """
+    dag = get_dag(context, dag_id)
+    task = get_task(dag, task_id)
+    assert_equals(type(getattr(task, attr)).__name__, value_type)
