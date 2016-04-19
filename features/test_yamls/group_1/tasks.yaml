@@ -1,17 +1,14 @@
 #TASKS YAML
 
 
-fill_bookings:
+my_task:
   default:
     android:
       type: exasol
-      sql:  execute script ACROSS_GAMES.FILL_BOOKINGS_ANDROID('{{ params.game }}','{{ ds }}','{{ ds }}')
-    ios:
+      sql:
+
+my_other_task:
+  default:
+    android:
       type: exasol
-      sql:  execute script ACROSS_GAMES.FILL_BOOKINGS_IOS('{{ params.game }}','{{ ds }}','{{ ds }}')
-    amazon:
-      type: exasol
-      sql:  execute script ACROSS_GAMES.FILL_BOOKINGS_ANDROID_AMAZON('{{ params.game }}','{{ ds }}','{{ ds }}')
-    facebook:
-      type: exasol
-      sql:  execute script ACROSS_GAMES.FILL_BOOKINGS_FLASH('{{ params.game }}','{{ ds }}','{{ ds }}')
+      sql:

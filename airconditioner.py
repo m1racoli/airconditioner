@@ -1,6 +1,6 @@
 from os import path
 
-from configure import Configuration
+from configure import Configuration, ConfigurationError
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.exasol_operator import ExasolOperator
@@ -15,13 +15,23 @@ class Config(object):
     def __load(cls, file_path):
         return Configuration.from_file(file_path).configure()
 
-    def __init__(self, file_path=None, conf=None):
+    def __init__(self, yaml_path=None, file_name=None, conf=None):
         """
         :type file_path: str
         :type conf: Configuration
         """
-        if file_path is not None:
-            self.conf = self.__load(file_path)
+        if yaml_path is None:
+            yaml_path = self._base_path
+        if file_name is not None:
+            file_path = path.join(yaml_path, file_name)
+
+            try:
+                self.conf = self.__load(file_path)
+            except ConfigurationError:
+                # TODO: better handle empty file errors
+                self.conf = {}
+                pass
+
         if conf is not None:
             assert isinstance(conf, object)
             self.conf = conf
@@ -85,15 +95,9 @@ class TimeDelta(object):
 
 
 class GameConfig(Config):
-    def __init__(self, game=None, conf=None, parent=None, path=None):
-        file_path = None
-        if conf is None:
-            if path is None:
-                file_path = path.join(super(GameConfig, self)._base_path, 'games.yaml')
-            else:
-                file_path = ''
-
-        super(GameConfig, self).__init__(file_path=file_path, conf=conf)
+    def __init__(self, game=None, conf=None, parent=None, yaml_path=None):
+        file_name = 'games.yaml' if conf is None else None
+        super(GameConfig, self).__init__(file_name=file_name, conf=conf, yaml_path=yaml_path)
 
         if game is not None:
             self.game = game
@@ -138,9 +142,9 @@ class GameConfig(Config):
 
 
 class ClusterConfig(Config):
-    def __init__(self, conf=None):
-        file_path = path.join(super(ClusterConfig, self)._base_path, 'clusters.yaml') if conf is None else None
-        super(ClusterConfig, self).__init__(file_path=file_path, conf=conf)
+    def __init__(self, conf=None, yaml_path=None):
+        file_name = 'clusters.yaml' if conf is None else None
+        super(ClusterConfig, self).__init__(file_name=file_name, conf=conf, yaml_path=yaml_path)
 
     def get_tasks(self, cluster_id):
         cluster = self.conf.get(cluster_id)
@@ -161,9 +165,10 @@ task_types = {
 
 class TaskConfig(Config):
 
-    def __init__(self, conf=None):
-        file_path = path.join(super(TaskConfig, self)._base_path, 'tasks.yaml') if conf is None else None
-        super(TaskConfig, self).__init__(file_path=file_path, conf=conf)
+    def __init__(self, conf=None, yaml_path=None):
+        file_name = 'tasks.yaml' if conf is None else None
+        super(TaskConfig, self).__init__(file_name=file_name, conf=conf, yaml_path=yaml_path)
+        print self.conf
 
     def compile_tasks(self, dag, game_config, deps_config, cluster_config):
         tasks = {}
@@ -261,12 +266,12 @@ class TaskConfig(Config):
 
 
 class DepConfig(Config):
-    def __init__(self, conf=None):
+    def __init__(self, conf=None, yaml_path=None):
         """
         :type conf: Configuration
         """
-        file_path = path.join(super(DepConfig, self)._base_path, 'dependencies.yaml') if conf is None else None
-        super(DepConfig, self).__init__(file_path=file_path, conf=conf)
+        file_name = 'dependencies.yaml' if conf is None else None
+        super(DepConfig, self).__init__(file_name=file_name, conf=conf, yaml_path=yaml_path)
 
     def get_deps(self, task_id):
         return self.conf.get(task_id, {})
@@ -281,7 +286,7 @@ class DepConfig(Config):
 
 
 class DAGBuilder(object):
-    def __init__(self, conf=None, path=None):
+    def __init__(self, conf=None, yaml_path=None):
         """
         :param conf:
         :type: Configuration
@@ -291,16 +296,11 @@ class DAGBuilder(object):
             self.deps_config = DepConfig(conf=conf.dependencies)
             self.cluster_config = ClusterConfig(conf=conf.clusters)
             self.task_config = TaskConfig(conf=conf.tasks)
-        elif path is not None:
-            self.game_config = GameConfig(path=path)
-            self.deps_config = DepConfig()
-            self.cluster_config = ClusterConfig()
-            self.task_config = TaskConfig()
         else:
-            self.game_config = GameConfig()
-            self.deps_config = DepConfig()
-            self.cluster_config = ClusterConfig()
-            self.task_config = TaskConfig()
+            self.deps_config = DepConfig(yaml_path=yaml_path)
+            self.cluster_config = ClusterConfig(yaml_path=yaml_path)
+            self.task_config = TaskConfig(yaml_path=yaml_path)
+            self.game_config = GameConfig(yaml_path=yaml_path)
 
     def build(self, game=None):
         """

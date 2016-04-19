@@ -374,12 +374,4 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    context.dags = DAGBuilder(path=context.path).build()
-
-
-@then("I have the DAG defined in the YAMLs")
-def step_impl(context):
-    """
-    :type context: behave.runner.Context
-    """
-    pass
+    context.dags = DAGBuilder(yaml_path=context.path).build()

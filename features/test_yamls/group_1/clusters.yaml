@@ -1,5 +1,6 @@
 #CLUSTERS YAML
 #Logical grouping of tasks
 
-bookings:
-    - fill_bookings
+my_cluster:
+    - my_task
+    - my_other_task

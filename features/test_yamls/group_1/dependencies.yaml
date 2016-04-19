@@ -1,18 +1,4 @@
-#GAMES YAML
+#DEPENDENCIES YAML
 
-my_game:
-  default_args:
-    start_date: 2016-03-20
-    end_date: 2016-04-01
-    owner: deploy
-    depends_on_past: True
-    email:
-      - bit-admin@wooga.net
-    email_on_failure: True
-    email_on_retry: False
-    queue: consumer-jail-04
-  clusters:
-    bookings:
-      start_date: 2016-03-25
-  platform: android
-  params:
+my_task:
+  - my_other_task
