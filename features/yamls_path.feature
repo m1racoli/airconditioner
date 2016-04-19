@@ -2,7 +2,6 @@
 Feature: Build from different Yaml paths
   # Enter feature description here
 
-  @wip
   Scenario: Load a group of yamls
     Given I have a set of YAMLs located at "features/test_yamls/group_1"
     When I build the DAGs from those YAMLs
