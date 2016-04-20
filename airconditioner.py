@@ -10,13 +10,11 @@ import logging
 
 
 def date_to_datetime(args):
-    if args.get('start_date'):
-        print type(args['start_date'])
-        d = args['start_date']
-        args['start_date'] = datetime(d.year, d.month, d.day)
-    if args.get('end_date'):
-        d = args['end_date']
-        args['end_date'] = datetime(d.year, d.month, d.day)
+    date_attrs = ['start_date', 'end_date']
+
+    for attr in date_attrs:
+        if args.get(attr):
+            args[attr] = datetime(args[attr].year, args[attr].month, args[attr].day)
 
     return args
 
