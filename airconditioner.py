@@ -312,9 +312,10 @@ class DAGBuilder(object):
             self.task_config = TaskConfig(yaml_path=yaml_path)
             self.game_config = GameConfig(yaml_path=yaml_path)
 
-    def build(self, game=None):
+    def build(self, game=None, load=False):
         """
         Appends tasks and dependencies to the given DAG based on the configuration
+        :param load: Load DAGs into globals() for Airflow to pickup
         :param game:
         :type: string
 
@@ -328,5 +329,8 @@ class DAGBuilder(object):
             dag = DAG(game, default_args=game_config.default_args)
             self.task_config.compile_tasks(dag, game_config, self.deps_config, self.cluster_config)
             dags.append(dag)
+            # load DAGs into globals() for Airflow to pickup
+            if load:
+                globals()[dag.dag_id] = dag
 
         return dags
