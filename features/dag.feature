@@ -47,4 +47,9 @@ Feature: Generate DAGs
     And The DAG "my_game" has the task "my_other_task"
     And In the DAG "my_game" the task "my_task" is dependency of "my_other_task"
 
-
+  Scenario: Build selected DAGs
+    Given The game config contains the item "my_dag_1"
+    And The game config contains the item "my_dag_2"
+    And The game config contains the item "my_dag_3"
+    When I build the DAGs with the ids "my_dag_2,my_dag_3"
+    Then There is 2 DAG

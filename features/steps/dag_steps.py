@@ -391,3 +391,15 @@ def step_impl(context, attr, task_id, dag_id, value_type):
     dag = get_dag(context, dag_id)
     task = get_task(dag, task_id)
     assert_equals(type(getattr(task, attr)).__name__, value_type)
+
+
+@when('I build the DAGs with the ids "{dag_ids}"')
+def step_impl(context, dag_ids):
+    """
+    :type dag_ids: str
+    :type context: behave.runner.Context
+    """
+    dag_ids = dag_ids.split(',')
+    yaml_string = yaml.safe_dump(context.dag_config, default_style='"').replace('"', '')
+    config = Configuration.from_string(yaml_string)
+    context.dags = DAGBuilder(conf=config).build(dag_ids=dag_ids)
