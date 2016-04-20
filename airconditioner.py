@@ -312,26 +312,29 @@ class DAGBuilder(object):
             self.task_config = TaskConfig(yaml_path=yaml_path)
             self.game_config = GameConfig(yaml_path=yaml_path)
 
-    def build(self, game=None, target=None):
+    def build(self, dag_ids=None, target=None):
         """
         Appends tasks and dependencies to the given DAG based on the configuration
         :param target: dictionary to load DAGs into with target[dag_id] = dag
         :type target: dict
-        :param game:
-        :type: string
-
+        :param dag_ids: DAGs to build, otherwise all defined DAGs
+        :type dag_ids: list
+        :returns: dictionary of built DAGs
+        :rtype: dict
         """
 
-        games = self.game_config.games if not game else [game]
-        dags = []
+        if not dag_ids:
+            dag_ids = self.game_config.games
 
-        for game in games:
-            game_config = GameConfig(game=game, conf=self.game_config.conf, parent=self.game_config)
-            dag = DAG(game, default_args=game_config.default_args)
+        dags = {}
+
+        for dag_id in dag_ids:
+            game_config = GameConfig(game=dag_id, conf=self.game_config.conf, parent=self.game_config)
+            dag = DAG(dag_id, default_args=game_config.default_args)
             self.task_config.compile_tasks(dag, game_config, self.deps_config, self.cluster_config)
-            dags.append(dag)
-            # load DAGs into globals() for Airflow to pickup
-            if target:
-                target[dag.dag_id] = dag
+            dags[dag.dag_id] = dag
+
+        if target:
+            target.update(dags)
 
         return dags

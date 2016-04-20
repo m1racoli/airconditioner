@@ -26,7 +26,7 @@ def step_impl(context):
 
 @then(u'There are no DAGs')
 def step_impl(context):
-    assert_equals(context.dags, [])
+    assert_equals(len(context.dags), 0)
 
 
 @given(u'The game config contains the item "{game}"')
@@ -132,9 +132,9 @@ def step_impl(context, game, task):
 
 
 def get_dag(context, dag_id):
-    for dag in context.dags:
-        if dag.dag_id == dag_id:
-            return dag
+    dag = context.dags.get(dag_id)
+    if dag:
+        return dag
     raise Exception('DAG %s not found' % dag_id)
 
 
