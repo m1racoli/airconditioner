@@ -99,7 +99,7 @@ class TimeDelta(object):
 
     def chain(self, tasks):
         deltas = [obj for _, obj in tasks.items() if type(obj) == task_types['time_delta']]
-        sorted(deltas, key=lambda delta: delta.delta)
+        deltas.sort(key=lambda delta: delta.delta)
 
         for this_delta, next_delta in zip(deltas, deltas[1:]):
             this_delta.set_downstream(next_delta)
