@@ -5,7 +5,9 @@ from datetime import datetime
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.exasol_operator import ExasolOperator
-from airflow.operators.sensors import TimeDeltaSensor, SleepSensor, SqlSensor, ExternalTaskSensor
+from airflow.operators.bash_operator import BashOperator
+from airflow.operators.sub_schedule_operator import SubScheduleOperator
+from airflow.operators.sensors import TimeDeltaSensor, SleepSensor, SqlSensor, ExternalTaskSensor, TimeSensor
 import logging
 
 
@@ -165,11 +167,14 @@ class ClusterConfig(Config):
 
 
 task_types = {
+    'time_sensor': TimeSensor,
     'time_delta': TimeDeltaSensor,
     'exasol': ExasolOperator,
     'sleep': SleepSensor,
     'sql_sensor': SqlSensor,
     'task': ExternalTaskSensor,
+    'subschedule': SubScheduleOperator,
+    'bash': BashOperator,
     'dummy': DummyOperator,
 }
 
