@@ -10,6 +10,11 @@ Feature: Check config type conversion
     Then The type of "my_date" is a "date"
 
   Scenario: Timedelta
-    Given The line "my_delta: !timedelta 2h" has been appended to the YAML config
+    Given The line "my_delta: !!timedelta 2h 2m" has been appended to the YAML config
     When I load the YAML config
     Then The type of "my_delta" is a "timedelta"
+
+  Scenario: Lambda
+    Given The line "my_lambda: !!lambda x: x*x" has been appended to the YAML config
+    When I load the YAML config
+    Then The type of "my_lambda" is a "function"
