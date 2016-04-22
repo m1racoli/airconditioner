@@ -11,10 +11,7 @@ setup(
     description='Yaml based DAG configurator for airflow',
     install_requires=[
         "behave",
-        "configure",
+        "pyyaml",
         "airflow",
     ],
-    extras_require={
-        'dev': ['pyyaml']
-    }
 )

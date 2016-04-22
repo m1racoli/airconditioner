@@ -1,5 +1,5 @@
 behave
-configure
+pyyaml
 
 -e git+https://github.com/wooga/airflow.git@master#egg=airflow[mysql,celery,jdbc,async]
--e .[dev]
+-e .
