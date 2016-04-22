@@ -3,12 +3,16 @@ from datetime import datetime
 from os import path
 
 import yaml
+import constructors
 from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.exasol_operator import ExasolOperator
 from airflow.operators.sensors import TimeDeltaSensor, SleepSensor, SqlSensor, ExternalTaskSensor, TimeSensor
 from airflow.operators.sub_schedule_operator import SubScheduleOperator
+
+# load YAML constructors when importing this module
+constructors.load()
 
 
 def date_to_datetime(args):
