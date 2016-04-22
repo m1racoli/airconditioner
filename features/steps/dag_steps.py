@@ -1,10 +1,9 @@
-from behave import *
-from configure import Configuration
 from datetime import datetime
 
-from airconditioner import DAGBuilder, task_types
-
 import yaml
+from behave import *
+
+from airconditioner import DAGBuilder, task_types
 
 
 @given(u'We have an empty configuration')
@@ -20,7 +19,7 @@ def step_impl(context):
 @when(u'I build the DAGs')
 def step_impl(context):
     yaml_string = yaml.safe_dump(context.dag_config, default_style='"').replace('"', '')
-    config = Configuration.from_string(yaml_string)
+    config = yaml.load(yaml_string)
     context.dags = DAGBuilder(conf=config).build()
 
 
@@ -54,7 +53,7 @@ def assert_contains(l, item):
 
 
 def assert_does_not_contain(l, item):
-        assert item not in l, "%s found in %s" % (item, l)
+    assert item not in l, "%s found in %s" % (item, l)
 
 
 def assert_contains_task_id(l, item):
@@ -115,7 +114,7 @@ def step_impl(context, game, profile):
 def step_impl(context, game, cnt):
     """
     :type game: str
-    :type cnt: integer
+    :param cnt: integer
     :type context: behave.runner.Context
     """
     assert_equals(len(get_dag(context, game).tasks), cnt)
@@ -138,14 +137,14 @@ def get_dag(context, dag_id):
     raise Exception('DAG %s not found' % dag_id)
 
 
-@given('The task "{task}" is a {type} operator as default')
-def step_impl(context, task, type):
+@given('The task "{task}" is a {task_type} operator as default')
+def step_impl(context, task, task_type):
     """
     :type task: str
-    :type type: str
+    :type task_type: str
     :type context: behave.runner.Context
     """
-    context.dag_config['tasks'][task] = {'default': {'default': {'type': type}}}
+    context.dag_config['tasks'][task] = {'default': {'default': {'type': task_type}}}
 
 
 @given("There are minimum default arguments specified")
@@ -213,21 +212,21 @@ def get_task(dag, task_id):
     return next(x for x in dag.tasks if x.task_id == task_id)
 
 
-@given('The game "{game_id}" has the {type} "{key}" set as "{value}"')
-def step_impl(context, game_id, type, key, value):
+@given('The game "{game_id}" has the {task_type} "{key}" set as "{value}"')
+def step_impl(context, game_id, task_type, key, value):
     """
     :type game_id: str
-    :type type: str
+    :type task_type: str
     :type key: str
     :type value: str
     :type context: behave.runner.Context
     """
-    if type == 'parameter':
+    if task_type == 'parameter':
         t = 'params'
-    elif type == 'argument':
+    elif task_type == 'argument':
         t = 'default_args'
     else:
-        raise Exception('unkknow type %s' % type)
+        raise Exception('unkknow type %s' % task_type)
 
     conf = context.dag_config['games'].get(game_id)
     if conf is None:
@@ -278,11 +277,11 @@ def step_impl(context, cluster_id, game_id, key, value):
     cluster[key] = value
 
 
-@step('The task "{task_id}" is a {type} operator for profile "{profile}" and platform "{platform}"')
-def step_impl(context, task_id, type, profile, platform):
+@step('The task "{task_id}" is a {task_type} operator for profile "{profile}" and platform "{platform}"')
+def step_impl(context, task_id, task_type, profile, platform):
     """
     :type task_id: str
-    :type type: str
+    :type task_type: str
     :type profile: str
     :type platform: str
     :type context: behave.runner.Context
@@ -299,7 +298,7 @@ def step_impl(context, task_id, type, profile, platform):
         task_config[profile] = {}
         profile_config = task_config[profile]
 
-    profile_config[platform] = {'type': type}
+    profile_config[platform] = {'type': task_type}
 
 
 @then('The DAG "{dag_id}" has the task "{task_id}" as a {task_type} operator')
@@ -316,7 +315,8 @@ def step_impl(context, dag_id, task_id, task_type):
     assert_equals(type(task), task_types[task_type])
 
 
-@step('The task "{task_id}" for profile "{profile}" and platform "{platform}" has the argument "{key}" set to "{value}"')
+@step(
+    'The task "{task_id}" for profile "{profile}" and platform "{platform}" has the argument "{key}" set to "{value}"')
 def step_impl(context, task_id, profile, platform, key, value):
     """
     :type task_id: str
@@ -382,9 +382,9 @@ def step_impl(context):
 @then('The attribute "{attr}" of the task "{task_id}" in DAG "{dag_id}" is of type "{value_type}"')
 def step_impl(context, attr, task_id, dag_id, value_type):
     """
+    :param dag_id:
     :type attr: str
     :type task_id: str
-    :type game_id: str
     :type value_type: str
     :type context: behave.runner.Context
     """
@@ -401,5 +401,5 @@ def step_impl(context, dag_ids):
     """
     dag_ids = dag_ids.split(',')
     yaml_string = yaml.safe_dump(context.dag_config, default_style='"').replace('"', '')
-    config = Configuration.from_string(yaml_string)
+    config = yaml.load(yaml_string)
     context.dags = DAGBuilder(conf=config).build(dag_ids=dag_ids)

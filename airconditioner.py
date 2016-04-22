@@ -1,14 +1,14 @@
+import logging
+from datetime import datetime
 from os import path
 
-from configure import Configuration, ConfigurationError
-from datetime import datetime
+import yaml
 from airflow import DAG
+from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.exasol_operator import ExasolOperator
-from airflow.operators.bash_operator import BashOperator
-from airflow.operators.sub_schedule_operator import SubScheduleOperator
 from airflow.operators.sensors import TimeDeltaSensor, SleepSensor, SqlSensor, ExternalTaskSensor, TimeSensor
-import logging
+from airflow.operators.sub_schedule_operator import SubScheduleOperator
 
 
 def date_to_datetime(args):
@@ -26,49 +26,45 @@ class Config(object):
 
     @classmethod
     def __load(cls, file_path):
-        return Configuration.from_file(file_path).configure()
+        return yaml.load(file(file_path, 'r'))
 
     def __init__(self, yaml_path=None, file_name=None, conf=None):
         """
-        :type file_path: str
-        :type conf: Configuration
+        :type yaml_path: str
+        :type file_name: str
+        :type conf: dict
         """
         if yaml_path is None:
             yaml_path = self._base_path
-        if file_name is not None:
-            file_path = path.join(yaml_path, file_name)
-
-            try:
-                self.conf = self.__load(file_path)
-            except ConfigurationError:
-                # TODO: better handle empty file errors
-                self.conf = {}
-                pass
-
         if conf is not None:
-            assert isinstance(conf, object)
             self.conf = conf
+        else:
+            if file_name is not None:
+                file_path = path.join(yaml_path, file_name)
+                self.conf = self.__load(file_path)
+            else:
+                self.conf = {}
 
-            # @classmethod
-            # def validate(cls):
-            #
-            #     dep_tasks = set()
-            #     # check if all tasks in 'dependencies' are define in 'tasks'
-            #     for task, deps in cls.settings['dependencies'].items():
-            #         dep_tasks.add(task)
-            #         for dep in deps:
-            #             dep_tasks.add(dep)
-            #
-            #     def_tasks = set()
-            #     for task in cls.settings['tasks']:
-            #         def_tasks.add(task)
-            #
-            #     for dep_task in dep_tasks:
-            #         if dep_task not in def_tasks:
-            #             raise Exception("the task '%s' is not defined" % dep_task)
-            #
-            #     # TODO implement more validation
-            #     pass
+                # @classmethod
+                # def validate(cls):
+                #
+                #     dep_tasks = set()
+                #     # check if all tasks in 'dependencies' are define in 'tasks'
+                #     for task, deps in cls.settings['dependencies'].items():
+                #         dep_tasks.add(task)
+                #         for dep in deps:
+                #             dep_tasks.add(dep)
+                #
+                #     def_tasks = set()
+                #     for task in cls.settings['tasks']:
+                #         def_tasks.add(task)
+                #
+                #     for dep_task in dep_tasks:
+                #         if dep_task not in def_tasks:
+                #             raise Exception("the task '%s' is not defined" % dep_task)
+                #
+                #     # TODO implement more validation
+                #     pass
 
 
 # run this file to validate and print the configuration
@@ -84,6 +80,7 @@ class Config(object):
 class TimeDelta(object):
     def __init__(self, dag):
         self.dag = dag
+        self.deltas = {}
 
     def get(self, delta, start_time, *args, **kwargs):
         if delta in self.deltas:
@@ -99,7 +96,8 @@ class TimeDelta(object):
         self.deltas[delta] = sensor
         return sensor
 
-    def chain(self, tasks):
+    @staticmethod
+    def chain(tasks):
         deltas = [obj for _, obj in tasks.items() if type(obj) == task_types['time_delta']]
         deltas.sort(key=lambda delta: delta.delta)
 
@@ -180,7 +178,6 @@ task_types = {
 
 
 class TaskConfig(Config):
-
     def __init__(self, conf=None, yaml_path=None):
         file_name = 'tasks.yaml' if conf is None else None
         super(TaskConfig, self).__init__(file_name=file_name, conf=conf, yaml_path=yaml_path)
@@ -283,7 +280,7 @@ class TaskConfig(Config):
 class DepConfig(Config):
     def __init__(self, conf=None, yaml_path=None):
         """
-        :type conf: Configuration
+        :type conf: dict
         """
         file_name = 'dependencies.yaml' if conf is None else None
         super(DepConfig, self).__init__(file_name=file_name, conf=conf, yaml_path=yaml_path)
@@ -304,13 +301,13 @@ class DAGBuilder(object):
     def __init__(self, conf=None, yaml_path=None):
         """
         :param conf:
-        :type: Configuration
+        :type: dict
         """
         if conf is not None:
-            self.game_config = GameConfig(conf=conf.games)
-            self.deps_config = DepConfig(conf=conf.dependencies)
-            self.cluster_config = ClusterConfig(conf=conf.clusters)
-            self.task_config = TaskConfig(conf=conf.tasks)
+            self.game_config = GameConfig(conf=conf['games'])
+            self.deps_config = DepConfig(conf=conf['dependencies'])
+            self.cluster_config = ClusterConfig(conf=conf['clusters'])
+            self.task_config = TaskConfig(conf=conf['tasks'])
         else:
             self.deps_config = DepConfig(yaml_path=yaml_path)
             self.cluster_config = ClusterConfig(yaml_path=yaml_path)

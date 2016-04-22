@@ -61,5 +61,3 @@ def step_impl(context, key, output):
 
 def assert_equals(actual, expected):
     assert actual == expected, "expected %s, but got %s" % (expected, actual)
-
-

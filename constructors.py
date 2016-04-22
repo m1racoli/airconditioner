@@ -3,7 +3,6 @@ from datetime import timedelta
 
 import yaml
 
-
 __timedelta_regex = re.compile(
     r'((?P<weeks>\d+?)w)?((?P<days>\d+?)d)?((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
 
