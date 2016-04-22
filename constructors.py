@@ -1,7 +1,7 @@
+import re
 from datetime import timedelta
 
 import yaml
-import re
 
 
 __timedelta_regex = re.compile(

@@ -9,12 +9,28 @@ Feature: Check config type conversion
     When I load the YAML config
     Then The type of "my_date" is a "date"
 
-  Scenario: Timedelta
-    Given The line "my_delta: !!timedelta 2h 2m" has been appended to the YAML config
+  Scenario Outline: Timedelta
+    Given The line "my_delta: !timedelta <in>" has been appended to the YAML config
     When I load the YAML config
     Then The type of "my_delta" is a "timedelta"
+    And The object "my_delta" prints to "<out>"
 
-  Scenario: Lambda
-    Given The line "my_lambda: !!lambda x: x*x" has been appended to the YAML config
+    Examples:
+      | in            | out               |
+      | 6s            | 0:00:06           |
+      | 12m           | 0:12:00           |
+      | 14h           | 14:00:00          |
+      | 3d            | 3 days, 0:00:00   |
+      | 4w            | 28 days, 0:00:00  |
+      | 2w5d22h34m12s | 19 days, 22:34:12 |
+
+  Scenario Outline: Lambda
+    Given The line "my_lambda: !lambda '<fun>'" has been appended to the YAML config
     When I load the YAML config
     Then The type of "my_lambda" is a "function"
+    And The function "my_lambda" evaluates "<in>" to "<out>"
+
+    Examples:
+      | fun          | in  | out |
+      | s: s.lower() | STR | str |
+      | s: s.upper() | str | STR |

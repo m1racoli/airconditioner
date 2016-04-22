@@ -1,5 +1,6 @@
 from behave import *
-from configure import Configuration
+import yaml
+import constructors
 
 
 @given("We have an empty yaml configuration")
@@ -13,9 +14,9 @@ def step_impl(context):
 @given('The line "{line}" has been appended to the YAML config')
 def step_impl(context, line):
     """
-    :type key: str
-    :type value: str
     :type context: behave.runner.Context
+    :param line:
+    :type line: str
     """
     context.yaml_config += line + '\n'
 
@@ -25,7 +26,8 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    context.yaml_config = Configuration.from_string(context.yaml_config)
+    constructors.load()
+    context.yaml_config = yaml.load(context.yaml_config)
 
 
 @then('The type of "{key}" is a "{value_type}"')
@@ -36,6 +38,25 @@ def step_impl(context, key, value_type):
     :type context: behave.runner.Context
     """
     assert_equals(type(context.yaml_config[key]).__name__, value_type)
+
+
+@then('The function "{key}" evaluates "{input}" to "{output}"')
+def step_impl(context, key, input, output):
+    """
+    :type context: behave.runner.Context
+    :type in: str
+    :type out: str
+    """
+    assert_equals(context.yaml_config[key](input), output)
+
+
+@then('The object "{key}" prints to "{output}"')
+def step_impl(context, key, output):
+    """
+    :type context: behave.runner.Context
+    :type str: str
+    """
+    assert_equals(context.yaml_config[key].__str__(), output)
 
 
 def assert_equals(actual, expected):
