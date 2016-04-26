@@ -212,21 +212,21 @@ def get_task(dag, task_id):
     return next(x for x in dag.tasks if x.task_id == task_id)
 
 
-@given('The game "{game_id}" has the {task_type} "{key}" set as "{value}"')
-def step_impl(context, game_id, task_type, key, value):
+@given('The game "{game_id}" has the {item_type} "{key}" set as "{value}"')
+def step_impl(context, game_id, item_type, key, value):
     """
     :type game_id: str
-    :type task_type: str
+    :type item_type: str
     :type key: str
     :type value: str
     :type context: behave.runner.Context
     """
-    if task_type == 'parameter':
+    if item_type == 'parameter':
         t = 'params'
-    elif task_type == 'argument':
+    elif item_type == 'argument':
         t = 'default_args'
     else:
-        raise Exception('unkknow type %s' % task_type)
+        raise Exception('unkknow type %s' % item_type)
 
     conf = context.dag_config['games'].get(game_id)
     if conf is None:
