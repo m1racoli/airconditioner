@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='airconditioner',
-    version='0.1.0',
+    version='0.2.0',
     py_modules=['airconditioner', 'constructors'],
     url='https://github.com/wooga/bit.airconditioner',
     license='',
