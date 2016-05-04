@@ -4,6 +4,7 @@ from os import path
 
 import yaml
 import constructors
+import airflow.configuration
 from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
@@ -40,6 +41,9 @@ class Config(object):
         """
         if yaml_path is None:
             yaml_path = self._base_path
+        elif not path.isabs(yaml_path):
+            dags_path = airflow.configuration.get_dags_folder()
+            yaml_path = path.join(dags_path, yaml_path)
         if conf is not None:
             self.conf = conf
         else:
