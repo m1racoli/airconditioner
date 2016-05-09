@@ -182,7 +182,16 @@ task_types = {
     'subschedule': SubScheduleOperator,
     'bash': BashOperator,
     'dummy': DummyOperator,
+    'none': None
 }
+
+
+class NoTaskException(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
 
 
 class TaskConfig(Config):
@@ -199,7 +208,7 @@ class TaskConfig(Config):
             for task_id in cluster_config.get_tasks(cluster):
                 if not dag.has_task(task_id):
                     result = self.resolve(dag, task_id, game_config, cluster_options)
-                    if result:
+                    if result is not None:
                         tasks[task_id] = result
 
         deps_config.apply_deps(tasks)
@@ -211,10 +220,9 @@ class TaskConfig(Config):
         task_config = self.conf.get(task_id)
 
         if not task_config:
-            logging.warn("No configuration found for task '%s'" % task_id)
-            return None
+            raise NoTaskException("No configuration found for task '%s'" % task_id)
 
-        task_config = task_config.get(profile, task_config.get('default'))  # ASK ABOUT THIS AND YAML
+        task_config = task_config.get(profile, task_config.get('default'))
 
         if not task_config:
             logging.warn("No configuration found for task '%s' and profile '%s'" % (task_id, profile))
@@ -273,7 +281,7 @@ class TaskConfig(Config):
             else:
                 task_args[k] = v
 
-        if not type:
+        if not task_type:
             raise Exception("no type specified for task '%s'" % task_id)
 
         return self.make_task(task_type, task_args)
@@ -282,7 +290,12 @@ class TaskConfig(Config):
     def make_task(cls, task_type, params):
         if task_type not in task_types:
             raise Exception("task type '%s' not defined" % task_type)
-        return task_types[task_type](**params)
+
+        task_obj = task_types[task_type]
+        if task_obj is None:
+            return None
+
+        return task_obj(**params)
 
 
 class DepConfig(Config):

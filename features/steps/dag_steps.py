@@ -1,9 +1,40 @@
 from datetime import datetime
 
+import sys
 import yaml
 from behave import *
 
-from airconditioner import DAGBuilder, task_types
+from airconditioner import DAGBuilder, task_types, NoTaskException
+
+
+def assert_equals(actual, expected):
+    assert actual == expected, "expected %s, but got %s" % (expected, actual)
+
+
+def assert_contains(l, item):
+    assert item in l, "%s not found in %s" % (item, l)
+
+
+def assert_does_not_contain(l, item):
+    assert item not in l, "%s found in %s" % (item, l)
+
+
+def assert_contains_task_id(l, item):
+    assert item in [i.task_id for i in l], "%s not found in %s" % (item, l)
+
+
+def get_dag(context, dag_id):
+    dag = context.dags.get(dag_id)
+    if dag:
+        return dag
+    raise Exception('DAG %s not found' % dag_id)
+
+
+def get_task(dag, task_id):
+    for x in dag.tasks:
+        if x.task_id == task_id:
+            return x
+    return None
 
 
 @given(u'We have an empty configuration')
@@ -21,6 +52,17 @@ def step_impl(context):
     yaml_string = yaml.safe_dump(context.dag_config, default_style='"').replace('"', '')
     config = yaml.load(yaml_string)
     context.dags = DAGBuilder(conf=config).build()
+
+
+@when(u'I try to build the DAGs')
+def step_impl(context):
+    yaml_string = yaml.safe_dump(context.dag_config, default_style='"').replace('"', '')
+    config = yaml.load(yaml_string)
+    try:
+        context.dags = DAGBuilder(conf=config).build()
+    except Exception:
+        context.exception = {'type': sys.exc_info()[0].__name__, 'msg': sys.exc_info()[1]}
+        pass
 
 
 @then(u'There are no DAGs')
@@ -42,22 +84,6 @@ def step_impl(context, cnt):
 @then(u'The DAG "{game_id}" is empty')
 def step_impl(context, game_id):
     context.execute_steps(u'Then The DAG "{game}" has {cnt} tasks'.format(game=game_id, cnt=0))
-
-
-def assert_equals(actual, expected):
-    assert actual == expected, "expected %s, but got %s" % (expected, actual)
-
-
-def assert_contains(l, item):
-    assert item in l, "%s not found in %s" % (item, l)
-
-
-def assert_does_not_contain(l, item):
-    assert item not in l, "%s found in %s" % (item, l)
-
-
-def assert_contains_task_id(l, item):
-    assert item in [i.task_id for i in l], "%s not found in %s" % (item, l)
 
 
 @step('There is a cluster "{cluster}"')
@@ -130,13 +156,6 @@ def step_impl(context, game, task):
     assert_contains_task_id(get_dag(context, game).tasks, task)
 
 
-def get_dag(context, dag_id):
-    dag = context.dags.get(dag_id)
-    if dag:
-        return dag
-    raise Exception('DAG %s not found' % dag_id)
-
-
 @given('The task "{task}" is a {task_type} operator as default')
 def step_impl(context, task, task_type):
     """
@@ -206,10 +225,6 @@ def step_impl(context, param_key, task_id, dag_id, param_value):
     dag = get_dag(context, dag_id)
     task = get_task(dag, task_id)
     assert_equals(task.params.get(param_key), param_value)
-
-
-def get_task(dag, task_id):
-    return next(x for x in dag.tasks if x.task_id == task_id)
 
 
 @given('The game "{game_id}" has the {item_type} "{key}" set as "{value}"')
@@ -403,3 +418,50 @@ def step_impl(context, dag_ids):
     yaml_string = yaml.safe_dump(context.dag_config, default_style='"').replace('"', '')
     config = yaml.load(yaml_string)
     context.dags = DAGBuilder(conf=config).build(dag_ids=dag_ids)
+
+
+@then('There is no task "{task_id}" in the DAG "{dag_id}"')
+def step_impl(context, task_id, dag_id):
+    """
+    :type task_id: str
+    :type dag_id: str
+    :type context: behave.runner.Context
+    """
+    dag = get_dag(context, dag_id)
+    task = get_task(dag, task_id)
+    assert_equals(task, None)
+
+
+@step("There hasn't been an exception")
+def step_impl(context):
+    """
+    :type context: behave.runner.Context
+    """
+    e = getattr(context, "exception", None)
+    assert_equals(e, None)
+
+
+@then('There has been an exception "{exception_type}"')
+def step_impl(context, exception_type):
+    """
+    :type exception_type: str
+    :type context: behave.runner.Context
+    """
+    e = getattr(context, "exception", {})
+    assert_equals(e.get('type'), exception_type)
+    print(e.get('msg'))
+
+
+@then('The task "{task_id}" in the DAG "{dag_id}" is a {operator_type} operator as default')
+def step_impl(context, task_id, dag_id, operator_type):
+    """
+    :param task_id:
+    :type dag_id: str
+    :type operator_type: str
+    :type context: behave.runner.Context
+    :type operator_type: str
+    """
+
+    dag = get_dag(context, dag_id)
+    task = get_task(dag, task_id)
+    assert_equals(type(task).__name__, operator_type)
