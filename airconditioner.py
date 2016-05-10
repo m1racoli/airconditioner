@@ -194,6 +194,14 @@ class NoTaskException(Exception):
         return repr(self.value)
 
 
+class TaskTypeException(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 class TaskConfig(Config):
     def __init__(self, conf=None, yaml_path=None):
         file_name = 'tasks.yaml' if conf is None else None
@@ -277,14 +285,20 @@ class TaskConfig(Config):
                 task_args[k] = v
 
         if not task_type:
-            raise Exception("no type specified for task '%s'" % task_id)
+            raise TaskTypeException(
+                "No type specified for task '%s' in platform '%s' and profile '%s'" %
+                (task_id, platform, profile)
+            )
 
         return self.make_task(task_type, task_args)
 
     @classmethod
     def make_task(cls, task_type, params):
         if task_type not in task_types:
-            raise Exception("task type '%s' not defined" % task_type)
+            raise TaskTypeException(
+                "The task type '%s' for task '%s' in platform '%s' and profile '%s' is unknown"
+                % (task_type, params['task_id'], params['params']['platform'], params['params']['profile'])
+            )
 
         task_obj = task_types[task_type]
         if task_obj is None:
@@ -319,8 +333,8 @@ class DepConfig(Config):
 
                 if not dep:
                     raise DependencyException(
-                        "Dependency '%s' for task '%s' not found in the DAG"
-                        % (dep_task_id, main_task_id))
+                        "Required task dependency '%s' for task '%s' not found in the DAG '%s'"
+                        % (dep_task_id, main_task_id, main_task.dag_id))
 
                 main_task.set_upstream(dep)
 

@@ -44,4 +44,9 @@ Feature: Different task types
     When I try to build the DAGs
     Then There has been an exception "NoTaskException"
 
+    Scenario: Throw exception for unknown task type
+    Given The task "my_task" is a bizarre operator as default
+    When I try to build the DAGs
+    Then There has been an exception "TaskTypeException"
+
 
