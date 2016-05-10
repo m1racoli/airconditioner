@@ -16,10 +16,10 @@ Feature: Resolve task definitions based on profiles
     When I build the DAGs
     Then The DAG "my_game" has the task "my_task"
 
-  Scenario: Resolve default with profile given
+  Scenario: Resolve default no default profile and with a different profile given
     Given The task "my_task" is a dummy operator for profile "my_profile" and platform "default"
-    When I build the DAGs
-    Then The DAG "my_game" is empty
+    When I try to build the DAGs
+    Then There has been an exception "NoTaskException"
 
   Scenario: Resolve profile with profile given
     Given The task "my_task" is a dummy operator for profile "my_profile" and platform "default"

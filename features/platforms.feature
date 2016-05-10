@@ -23,8 +23,8 @@ Feature: Resolve task definitions based on platforms
 
   Scenario: other platform given
     Given The task "my_task" is a dummy operator for profile "default" and platform "ios"
-    When I build the DAGs
-    Then The DAG "my_game" is empty
+    When I try to build the DAGs
+    Then There has been an exception "NoTaskException"
 
   Scenario: default and other platform given
     Given The task "my_task" is a dummy operator for profile "default" and platform "default"

@@ -225,18 +225,13 @@ class TaskConfig(Config):
         task_config = task_config.get(profile, task_config.get('default'))
 
         if not task_config:
-            logging.warn("No configuration found for task '%s' and profile '%s'" % (task_id, profile))
-            return None
+            raise NoTaskException("No configuration found for task '%s' and profile '%s'" % (task_id, profile))
 
         # resolve task configuration by platform
-        platform_task_config = task_config.get(platform)
+        platform_task_config = task_config.get(platform, task_config.get('default'))
 
         if not platform_task_config:
-            platform_task_config = task_config.get('default')
-
-        if not platform_task_config:
-            logging.warn("No configuration found for task '%s' and platform '%s'" % (task_id, platform))
-            return None
+            raise NoTaskException("No configuration found for task '%s' and platform '%s'" % (task_id, platform))
 
         return platform_task_config
 
