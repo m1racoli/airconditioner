@@ -47,12 +47,22 @@ Feature: Generate DAGs
     And The DAG "my_game" has the task "my_other_task"
     And In the DAG "my_game" the task "my_task" is dependency of "my_other_task"
 
-  Scenario: Missing dependency
+  Scenario: Missing dependency task definition
     Given There are minimum default arguments specified
     And The game config contains the item "my_game"
     And The game "my_game" has the platform "android"
     And The game "my_game" has the cluster "my_cluster"
     And The task "not_existing_task" is dependency of the task "my_task"
+    When I try to build the DAGs
+    Then There has been an exception "DependencyException"
+
+  Scenario: Missing dependency in the DAG
+    Given There are minimum default arguments specified
+    And The game config contains the item "my_game"
+    And The game "my_game" has the platform "android"
+    And The game "my_game" has the cluster "my_cluster"
+    And The task "outsider_task" is a dummy operator as default
+    And The task "outsider_task" is dependency of the task "my_task"
     When I try to build the DAGs
     Then There has been an exception "DependencyException"
 

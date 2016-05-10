@@ -293,6 +293,14 @@ class TaskConfig(Config):
         return task_obj(**params)
 
 
+class DependencyException(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 class DepConfig(Config):
     def __init__(self, conf=None, yaml_path=None):
         """
@@ -305,12 +313,16 @@ class DepConfig(Config):
         return self.conf.get(task_id, {})
 
     def apply_deps(self, tasks):
-
         for main_task_id, main_task in tasks.items():
             for dep_task_id in self.get_deps(main_task_id):
                 dep = tasks.get(dep_task_id)
-                if dep:
-                    main_task.set_upstream(dep)
+
+                if not dep:
+                    raise DependencyException(
+                        "Dependency '%s' for task '%s' not found in the DAG"
+                        % (dep_task_id, main_task_id))
+
+                main_task.set_upstream(dep)
 
 
 class DAGBuilder(object):

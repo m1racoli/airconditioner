@@ -4,7 +4,7 @@ import sys
 import yaml
 from behave import *
 
-from airconditioner import DAGBuilder, task_types, NoTaskException
+from airconditioner import DAGBuilder, task_types
 
 
 def assert_equals(actual, expected):
