@@ -36,8 +36,8 @@ DAGBuilder(yaml_path=<yaml_path>).build(target=globals())
 
 ### YAML path & files
 
-Airconditioner's DAG builder takes a `yaml_path` argument, which is the location of 4 YAML files necessary for building
-the tasks DAGs:
+Airconditioner's DAG builder takes a `yaml_path` argument, which is the location of a directory containing 4 YAML files
+necessary for building the tasks DAGs:
 
 * `games.yaml`: Where the game DAGs are defined.
 * `tasks.yaml`: Where the tasks are defined.
