@@ -113,6 +113,14 @@ class TimeDelta(object):
             this_delta.set_downstream(next_delta)
 
 
+class GameException(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 class GameConfig(Config):
     def __init__(self, game=None, conf=None, parent=None, yaml_path=None):
         file_name = 'games.yaml' if conf is None else None
@@ -122,13 +130,13 @@ class GameConfig(Config):
             self.game = game
             self.parent = parent
             self.conf = self.conf.get(game, {})
+            self.platform = self.conf.get('platform')
+
+            if not self.platform:
+                raise GameException("Game '%s' is missing required attribute 'platform'" % self.game)
         else:
             self.game = None
             self.parent = None
-
-    @property
-    def platform(self):
-        return self.conf['platform']
 
     @property
     def profile(self):
