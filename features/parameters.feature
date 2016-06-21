@@ -8,6 +8,7 @@ Feature: Define and overwrite parameters
     And There is a cluster "my_cluster"
     And The cluster "my_cluster" has the task "my_task"
     And The task "my_task" is a dummy operator as default
+    And The task "my_other_task" is a dummy operator as default
     And The game config contains the item "my_game"
     And The game "my_game" has the platform "android"
     And The game "my_game" has the cluster "my_cluster"
@@ -117,3 +118,12 @@ Feature: Define and overwrite parameters
     When I build the DAGs
     Then The DAG "my_game" has the task "my_task"
     Then The start_date of the task "my_task" in DAG "my_game" equals "2016-05-20"
+
+  Scenario: When start date is set on cluster and game for a task this must not affect other tasks
+    Given The game "my_game" has the argument "start_date" set as "2016-01-20"
+    And The cluster "my_cluster" has a task "my_task" with the argument "start_date" set as "2016-02-15"
+    And The cluster "my_cluster" has the task "my_other_task"
+    When I build the DAGs
+    Then The DAG "my_game" has the task "my_task"
+    And The start_date of the task "my_task" in DAG "my_game" equals "2016-02-15"
+    And The start_date of the task "my_other_task" in DAG "my_game" equals "2016-01-20"

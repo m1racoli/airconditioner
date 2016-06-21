@@ -26,14 +26,15 @@ def date_to_datetime(args):
     return args
 
 
-def update_date(dict_a, dict_b):
+def merge_date(dict_a, dict_b):
+    options = {}
+    options.update(dict_a)
     for key, value in dict_b.items():
         if dict_a.get(key) and isinstance(value, datetime):
-            dict_a[key] = max([dict_a.get(key), value])
+            options[key] = max([dict_a.get(key), value])
         else:
-            dict_a[key] = value
-    return dict_a
-
+            options[key] = value
+    return options
 
 
 class Config(object):
@@ -229,13 +230,13 @@ class TaskConfig(Config):
         tasks = {}
         time_delta = TimeDelta(dag)
 
-        for cluster, options in game_config.clusters.items():
-            options = date_to_datetime(options or {})
+        for cluster, cluster_options in game_config.clusters.items():
+            cluster_options = date_to_datetime(cluster_options or {})
             for task in cluster_config.get_tasks(cluster):
-
+                options = cluster_options
                 if isinstance(task, dict):
                     for task_id, task_options in task.items():
-                        options = update_date(options, date_to_datetime(task_options or {}))
+                        options = merge_date(options, date_to_datetime(task_options or {}))
                 else:
                     task_id = task
 
@@ -276,7 +277,7 @@ class TaskConfig(Config):
         :type: string
         :param game_config:
         :type: GameConfig
-        :param cluster_options:
+        :param options:
         :type: ClusterConfig
         :return:
         :rtype: airflow.models.BaseOperator
@@ -316,7 +317,6 @@ class TaskConfig(Config):
                 "No type specified for task '%s' in platform '%s' and profile '%s'" %
                 (task_id, platform, profile)
             )
-
 
         return self.make_task(task_type, task_args)
 
