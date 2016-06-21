@@ -147,7 +147,8 @@ a_task_to_calc_something:
 
 Because some tasks are often present together in some DAGs, we have clusters. Clusters organize tasks in logical groups,
 so they can be referenced in `games.yaml` easier, instead of having to add tasks one by one. A cluster requires an identification
-to be referenced and the list of tasks present in the cluster. These tasks need to be previously defined in `tasks.yaml`
+to be referenced and the list of tasks present in the cluster. These tasks need to be previously defined in `tasks.yaml`.
+It is possible to add some configurations to each task.
 
 
 Important: A task can be present in more than one cluster
@@ -156,7 +157,8 @@ Example:
 ```yaml
 my_cluster_name:
  - a_task_to_calc_something
- - another_task_to_calc_something_else
+ - another_task_to_calc_something_else:
+     start_date: 2016-06-21
 ```
 
 #### Dependencies
