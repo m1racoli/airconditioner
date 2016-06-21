@@ -26,6 +26,16 @@ def date_to_datetime(args):
     return args
 
 
+def update_date(dict_a, dict_b):
+    for key, value in dict_b.items():
+        if dict_a.get(key) and isinstance(value, datetime):
+            dict_a[key] = max([dict_a.get(key), value])
+        else:
+            dict_a[key] = value
+    return dict_a
+
+
+
 class Config(object):
     _base_path = path.join(path.abspath(path.dirname(__file__)), path.pardir, 'config')
 
@@ -219,11 +229,18 @@ class TaskConfig(Config):
         tasks = {}
         time_delta = TimeDelta(dag)
 
-        for cluster, cluster_options in game_config.clusters.items():
-            cluster_options = date_to_datetime(cluster_options or {})
-            for task_id in cluster_config.get_tasks(cluster):
+        for cluster, options in game_config.clusters.items():
+            options = date_to_datetime(options or {})
+            for task in cluster_config.get_tasks(cluster):
+
+                if isinstance(task, dict):
+                    for task_id, task_options in task.items():
+                        options = update_date(options, date_to_datetime(task_options or {}))
+                else:
+                    task_id = task
+
                 if not dag.has_task(task_id):
-                    result = self.resolve(dag, task_id, game_config, cluster_options)
+                    result = self.resolve(dag, task_id, game_config, options)
                     if result is not None:
                         tasks[task_id] = result
 
@@ -251,7 +268,7 @@ class TaskConfig(Config):
 
         return platform_task_config
 
-    def resolve(self, dag, task_id, game_config, cluster_options):
+    def resolve(self, dag, task_id, game_config, options):
         """
         :param dag:
         :type dag: airflow.models.DAG
@@ -276,8 +293,10 @@ class TaskConfig(Config):
         params['profile'] = profile
 
         # arguments for task constructor
-        task_args = cluster_options
+        task_args = options
         task_args.update({'params': params, 'dag': dag, 'task_id': task_id})
+        if task_args.get('start_date'):
+            task_args['start_date'] = max(task_args.get('start_date'), game_config.default_args.get('start_date'))
 
         task_config = self.get_task_config(task_id, profile, platform)
 
@@ -297,6 +316,7 @@ class TaskConfig(Config):
                 "No type specified for task '%s' in platform '%s' and profile '%s'" %
                 (task_id, platform, profile)
             )
+
 
         return self.make_task(task_type, task_args)
 

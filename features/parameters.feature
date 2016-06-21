@@ -79,3 +79,41 @@ Feature: Define and overwrite parameters
     And The cluster "my_cluster" for the game "my_game" has the argument "queue" set as "my_queue"
     When I build the DAGs
     Then The attribute "queue" of the task "my_task" in DAG "my_game" equals "my_queue"
+
+  Scenario: When start date is set on cluster and game config and cluster's is youngest, task has cluster date
+    Given The game "my_game" has the argument "start_date" set as "2016-03-20"
+    And The cluster "my_cluster" has a task "my_task" with the argument "start_date" set as "2016-06-15"
+    When I build the DAGs
+    Then The DAG "my_game" has the task "my_task"
+    Then The start_date of the task "my_task" in DAG "my_game" equals "2016-06-15"
+
+  Scenario: When start date is set on cluster and game config and game's is youngest, task has game date
+    Given The game "my_game" has the argument "start_date" set as "2016-06-20"
+    And The cluster "my_cluster" has a task "my_task" with the argument "start_date" set as "2016-03-15"
+    When I build the DAGs
+    Then The DAG "my_game" has the task "my_task"
+    Then The start_date of the task "my_task" in DAG "my_game" equals "2016-06-20"
+
+  Scenario: When start date is set on cluster, game and game cluster config and cluster's is youngest, task has cluster date
+    Given The game "my_game" has the argument "start_date" set as "2016-01-20"
+    Given The cluster "my_cluster" for the game "my_game" has the argument "start_date" set as "2016-03-20"
+    And The cluster "my_cluster" has a task "my_task" with the argument "start_date" set as "2016-06-15"
+    When I build the DAGs
+    Then The DAG "my_game" has the task "my_task"
+    Then The start_date of the task "my_task" in DAG "my_game" equals "2016-06-15"
+
+  Scenario: When start date is set on cluster, game and game cluster config and game clusters's is youngest, task has game cluster date
+    Given The game "my_game" has the argument "start_date" set as "2016-01-20"
+    Given The cluster "my_cluster" for the game "my_game" has the argument "start_date" set as "2016-06-20"
+    And The cluster "my_cluster" has a task "my_task" with the argument "start_date" set as "2016-03-15"
+    When I build the DAGs
+    Then The DAG "my_game" has the task "my_task"
+    Then The start_date of the task "my_task" in DAG "my_game" equals "2016-06-20"
+
+  Scenario: When start date is set on cluster, game and game cluster config and game is youngest, task has game date
+    Given The game "my_game" has the argument "start_date" set as "2016-05-20"
+    Given The cluster "my_cluster" for the game "my_game" has the argument "start_date" set as "2016-04-20"
+    And The cluster "my_cluster" has a task "my_task" with the argument "start_date" set as "2016-02-15"
+    When I build the DAGs
+    Then The DAG "my_game" has the task "my_task"
+    Then The start_date of the task "my_task" in DAG "my_game" equals "2016-05-20"

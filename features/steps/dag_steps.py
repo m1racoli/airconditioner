@@ -102,8 +102,31 @@ def step_impl(context, cluster, task):
     :type task: str
     :type context: behave.runner.Context
     """
-    # TODO make sure, there are not duplicates
-    context.dag_config['clusters'][cluster].append(task)
+    cluster_config = context.dag_config['clusters'][cluster]
+    if task not in cluster_config:
+        cluster_config.append(task)
+
+
+@given('The cluster "{cluster}" has a task "{task_id}" with the argument "{key}" set as "{value}"')
+def step_impl(context, cluster, task_id, key, value):
+    """
+    :type key: str
+    :type value: str
+    :type cluster: str
+    :type task_id: str
+    :type context: behave.runner.Context
+    """
+
+    item = {task_id: {key: value}}
+    cluster_config = context.dag_config['clusters'][cluster]
+
+    for task in cluster_config:
+        if isinstance(task, dict):
+            item[task_id].update(task.get(task_id, {}))
+        if task == task_id:
+            cluster_config.remove(task)
+
+    cluster_config.append(item)
 
 
 @given('The game "{game}" has the cluster "{cluster}"')
@@ -465,3 +488,16 @@ def step_impl(context, task_id, dag_id, operator_type):
     dag = get_dag(context, dag_id)
     task = get_task(dag, task_id)
     assert_equals(type(task).__name__, operator_type)
+
+
+@then('The start_date of the task "{task_id}" in DAG "{dag_id}" equals "{value}"')
+def step_impl(context, task_id, dag_id, value):
+    """
+    :type task_id: str
+    :type dag_id: str
+    :type value: str
+    :type context: behave.runner.Context
+    """
+    dag = get_dag(context, dag_id)
+    task = get_task(dag, task_id)
+    assert_equals(datetime.strftime(getattr(task, "start_date"),"%Y-%m-%d"), value)
