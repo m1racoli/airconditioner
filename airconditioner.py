@@ -1,4 +1,4 @@
-import logging
+import logging, re
 from datetime import datetime
 from os import path
 
@@ -344,6 +344,8 @@ class DependencyException(Exception):
 
 
 class DepConfig(Config):
+    optional_task_pattern = re.compile(r'\(([a-zA-Z0-9_-]+)\)')
+
     def __init__(self, conf=None, yaml_path=None):
         """
         :type conf: dict
@@ -352,19 +354,27 @@ class DepConfig(Config):
         super(DepConfig, self).__init__(file_name=file_name, conf=conf, yaml_path=yaml_path)
 
     def get_deps(self, task_id):
-        return self.conf.get(task_id, {})
+        return map(self.resolve_optional_task, self.conf.get(task_id, {}))
 
     def apply_deps(self, tasks):
         for main_task_id, main_task in tasks.items():
-            for dep_task_id in self.get_deps(main_task_id):
+            for dep_task_id, is_optional in self.get_deps(main_task_id):
                 dep = tasks.get(dep_task_id)
 
-                if not dep:
+                if dep:
+                    main_task.set_upstream(dep)
+                elif not is_optional:
                     raise DependencyException(
                         "Required task dependency '%s' for task '%s' not found in the DAG '%s'"
                         % (dep_task_id, main_task_id, main_task.dag_id))
 
-                main_task.set_upstream(dep)
+    @classmethod
+    def resolve_optional_task(cls, task_id):
+        match = cls.optional_task_pattern.match(task_id)
+        if match is None:
+            return task_id, False
+
+        return match.groups()[0], True
 
 
 class DAGBuilder(object):
