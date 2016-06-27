@@ -172,6 +172,9 @@ without creating loops. In `dependencies.yaml`, you can define which tasks are r
     - <dependency>
     - <dependency>
     - <dependency>
+    - (<optional-dependency>)
+    - (<optional-dependency>)
 ```
-These tasks need to be previously defined in `tasks.yaml`.
-
+These tasks need to be previously defined in `tasks.yaml`. Optional dependencies for task, which might only be added to
+the DAG in certain cases can be defined in parenthesis (i.e. `(task_id)` instead of `task_id`) and will not throw an 
+exception in case they're missing.
