@@ -221,6 +221,22 @@ def step_impl(context, task_upstream, task_downstream):
     dep.append(task_upstream)
 
 
+@given('The task "{task_upstream}" is an optional dependency of the task "{task_downstream}"')
+def step_impl(context, task_upstream, task_downstream):
+    """
+    :type task_upstream: str
+    :type task_downstream: str
+    :type context: behave.runner.Context
+    """
+
+    dep = context.dag_config['dependencies'].get(task_downstream)
+    if dep is None:
+        context.dag_config['dependencies'][task_downstream] = []
+    dep = context.dag_config['dependencies'].get(task_downstream)
+
+    dep.append("(%s)" % task_upstream)
+
+
 @step('In the DAG "{dag_id}" the task "{task_upstream}" is dependency of "{task_downstream}"')
 def step_impl(context, dag_id, task_upstream, task_downstream):
     """

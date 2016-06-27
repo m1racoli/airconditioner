@@ -78,6 +78,19 @@ Feature: Generate DAGs
     And The DAG "my_game" has the task "my_other_task"
     And In the DAG "my_game" the task "my_task" is dependency of "my_other_task"
 
+  Scenario: DAG with optional depending operators
+    Given There are minimum default arguments specified
+    And The game config contains the item "my_game"
+    And The game "my_game" has the platform "android"
+    And The game "my_game" has the cluster "my_cluster"
+    And The task "my_task" is an optional dependency of the task "my_other_task"
+    When I build the DAGs
+    Then There is 1 DAG
+    And The DAG "my_game" has 2 tasks
+    And The DAG "my_game" has the task "my_task"
+    And The DAG "my_game" has the task "my_other_task"
+    And In the DAG "my_game" the task "my_task" is dependency of "my_other_task"
+
   Scenario: Missing dependency task definition
     Given There are minimum default arguments specified
     And The game config contains the item "my_game"
@@ -96,6 +109,16 @@ Feature: Generate DAGs
     And The task "outsider_task" is dependency of the task "my_task"
     When I try to build the DAGs
     Then There has been an exception "DependencyException"
+
+  Scenario: No exception on missing optional dependency
+    Given There are minimum default arguments specified
+    And The game config contains the item "my_game"
+    And The game "my_game" has the platform "android"
+    And The game "my_game" has the cluster "my_cluster"
+    And The task "outsider_task" is a dummy operator as default
+    And The task "outsider_task" is an optional dependency of the task "my_task"
+    When I try to build the DAGs
+    Then There hasn't been an exception
 
   Scenario: Build selected DAGs
     Given The game config contains the item "my_dag_1"
