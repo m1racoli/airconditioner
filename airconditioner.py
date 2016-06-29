@@ -294,7 +294,7 @@ class TaskConfig(Config):
         params['profile'] = profile
 
         # arguments for task constructor
-        task_args = options
+        task_args = dict(options)
         task_args.update({'params': params, 'dag': dag, 'task_id': task_id})
         if task_args.get('start_date'):
             task_args['start_date'] = max(task_args.get('start_date'), game_config.default_args.get('start_date'))
@@ -317,6 +317,8 @@ class TaskConfig(Config):
                 "No type specified for task '%s' in platform '%s' and profile '%s'" %
                 (task_id, platform, profile)
             )
+
+
 
         return self.make_task(task_type, task_args)
 
