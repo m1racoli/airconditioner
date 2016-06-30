@@ -155,10 +155,13 @@ class GameConfig(Config):
 
     @property
     def params(self):
+        result = dict()
         parent_params = self.parent.conf.get('default', {}).get('params', {}) or {}
+
         params = self.conf.get('params', {}) or {}
-        parent_params.update(params)
-        return dict(parent_params)
+        result.update(parent_params)
+        result.update(params)
+        return result
 
     @property
     def clusters(self):
