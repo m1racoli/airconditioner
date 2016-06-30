@@ -235,6 +235,7 @@ class TaskConfig(Config):
 
         for cluster, cluster_options in game_config.clusters.items():
             cluster_options = date_to_datetime(cluster_options or {})
+            excluded_tasks = cluster_options.pop('exclude', {})
             for task in cluster_config.get_tasks(cluster):
                 options = cluster_options
                 if isinstance(task, dict):
@@ -243,7 +244,7 @@ class TaskConfig(Config):
                 else:
                     task_id = task
 
-                if not dag.has_task(task_id):
+                if task_id not in excluded_tasks and not dag.has_task(task_id):
                     result = self.resolve(dag, task_id, game_config, options)
                     if result is not None:
                         tasks[task_id] = result
