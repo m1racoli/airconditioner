@@ -65,10 +65,13 @@ Optional attributes:
      * email_on_failure: `True` or `False`
      * email_on_retry: `True` or `False`
 * clusters:
-     * list of task clusters. Important: they need to be present in `clusters.yaml`
-          * the same attributes in `default_args` can be repeated inside a cluster in case a specific cluster has different settings.
-* params
-     * custom parameters that will be passed ahead to tasks
+     * List of task clusters. Important: they need to be present in `clusters.yaml`.
+          * The same attributes in `default_args` can be repeated inside a cluster in case a specific cluster has different settings for their tasks.
+          * It is possible to add a cluster of tasks except by some specific tasks by excluding them with the
+ `exclude` attribute containing a list of tasks.
+* profile:  Some tasks may behave differently on certain scenarios, and it's possible to specify a profile here.
+* params:
+     * Custom parameters that will be passed ahead to tasks.
 
 Example:
 ```yaml
@@ -84,9 +87,13 @@ my_game_name:
     email_on_retry: False
     queue: consumer-jail-04
   clusters:
+    userbase_core:
+      exclude:
+        - calc_environment_userbase
     bookings:
       start_date: 2016-04-25
     another_cluster:
+  profile: low_traffic
   platform: android
   params:
     table_name: calc_something
