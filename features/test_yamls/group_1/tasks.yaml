@@ -4,11 +4,11 @@
 my_task:
   default:
     android:
-      type: exasol
+      type: mysql
       sql:
 
 my_other_task:
   default:
     android:
-      type: exasol
+      type: mysql
       sql:

@@ -2,9 +2,10 @@ from datetime import datetime
 
 import sys
 import yaml
+from airflow.models import BaseOperator
 from behave import *
 
-from airconditioner import DAGBuilder, task_types
+from airconditioner import DAGBuilder, system_task_types
 
 
 def assert_equals(actual, expected):
@@ -60,6 +61,17 @@ def step_impl(context):
     config = yaml.load(yaml_string)
     try:
         context.dags = DAGBuilder(conf=config).build()
+    except Exception:
+        context.exception = {'type': sys.exc_info()[0].__name__, 'msg': sys.exc_info()[1]}
+        pass
+
+
+@when(u'I try to build the DAGs with custom task types')
+def step_impl(context):
+    yaml_string = yaml.safe_dump(context.dag_config, default_style='"').replace('"', '')
+    config = yaml.load(yaml_string)
+    try:
+        context.dags = DAGBuilder(conf=config, custom_task_types=context.custom_task_types).build()
     except Exception:
         context.exception = {'type': sys.exc_info()[0].__name__, 'msg': sys.exc_info()[1]}
         pass
@@ -237,6 +249,25 @@ def step_impl(context, task_upstream, task_downstream):
     dep.append("(%s)" % task_upstream)
 
 
+@given(u'I define the type {custom_task_type} for the CustomOperator')
+def step_impl(context, custom_task_type):
+    """
+    :type custom_task_type: str
+    :return:
+    """
+
+    class CustomOperator(BaseOperator):
+        pass
+
+    if 'custom_task_types' in context:
+        custom_task_types = context.custom_task_types
+    else:
+        custom_task_types = {}
+
+    custom_task_types[custom_task_type] = CustomOperator
+    context.custom_task_types = custom_task_types
+
+
 @step('In the DAG "{dag_id}" the task "{task_upstream}" is dependency of "{task_downstream}"')
 def step_impl(context, dag_id, task_upstream, task_downstream):
     """
@@ -366,7 +397,7 @@ def step_impl(context, dag_id, task_id, task_type):
     dag = get_dag(context, dag_id)
     assert_contains(dag.task_ids, task_id)
     task = get_task(dag, task_id)
-    assert_equals(type(task), task_types[task_type])
+    assert_equals(type(task), system_task_types[task_type])
 
 
 @step(

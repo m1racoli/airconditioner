@@ -9,6 +9,7 @@ from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.exasol_operator import ExasolOperator
+from airflow.operators.mysql_operator import MySqlOperator
 from airflow.operators.sensors import TimeDeltaSensor, SleepSensor, SqlSensor, ExternalTaskSensor, TimeSensor
 from airflow.operators.sub_schedule_operator import SubScheduleOperator
 
@@ -117,7 +118,7 @@ class TimeDelta(object):
 
     @staticmethod
     def chain(tasks):
-        deltas = [obj for _, obj in tasks.items() if type(obj) == task_types['time_delta']]
+        deltas = [obj for _, obj in tasks.items() if type(obj) == system_task_types['time_delta']]
         deltas.sort(key=lambda delta: delta.delta)
 
         for this_delta, next_delta in zip(deltas, deltas[1:]):
@@ -194,14 +195,12 @@ class ClusterConfig(Config):
         return cluster or {}
 
 
-task_types = {
+system_task_types = {
     'time_sensor': TimeSensor,
     'time_delta': TimeDeltaSensor,
-    'exasol': ExasolOperator,
-    'sleep': SleepSensor,
+    'mysql': MySqlOperator,
     'sql_sensor': SqlSensor,
     'task': ExternalTaskSensor,
-    'subschedule': SubScheduleOperator,
     'bash': BashOperator,
     'dummy': DummyOperator,
     'none': None
@@ -229,7 +228,7 @@ class TaskConfig(Config):
         file_name = 'tasks.yaml' if conf is None else None
         super(TaskConfig, self).__init__(file_name=file_name, conf=conf, yaml_path=yaml_path)
 
-    def compile_tasks(self, dag, game_config, deps_config, cluster_config):
+    def compile_tasks(self, dag, game_config, deps_config, cluster_config, task_types):
         tasks = {}
         time_delta = TimeDelta(dag)
 
@@ -245,7 +244,7 @@ class TaskConfig(Config):
                     task_id = task
 
                 if task_id not in excluded_tasks and not dag.has_task(task_id):
-                    result = self.resolve(dag, task_id, game_config, options)
+                    result = self.resolve(dag, task_id, game_config, options, task_types)
                     if result is not None:
                         tasks[task_id] = result
 
@@ -273,7 +272,7 @@ class TaskConfig(Config):
 
         return platform_task_config
 
-    def resolve(self, dag, task_id, game_config, options):
+    def resolve(self, dag, task_id, game_config, options, task_types):
         """
         :param dag:
         :type dag: airflow.models.DAG
@@ -322,12 +321,10 @@ class TaskConfig(Config):
                 (task_id, platform, profile)
             )
 
-
-
-        return self.make_task(task_type, task_args)
+        return self.make_task(task_type, task_args, task_types)
 
     @classmethod
-    def make_task(cls, task_type, params):
+    def make_task(cls, task_type, params, task_types):
         if task_type not in task_types:
             raise TaskTypeException(
                 "The task type '%s' for task '%s' in platform '%s' and profile '%s' is unknown"
@@ -384,7 +381,7 @@ class DepConfig(Config):
 
 
 class DAGBuilder(object):
-    def __init__(self, conf=None, yaml_path=None):
+    def __init__(self, conf=None, yaml_path=None, custom_task_types=None):
         """
         :param conf:
         :type: dict
@@ -399,6 +396,12 @@ class DAGBuilder(object):
             self.cluster_config = ClusterConfig(yaml_path=yaml_path)
             self.task_config = TaskConfig(yaml_path=yaml_path)
             self.game_config = GameConfig(yaml_path=yaml_path)
+
+        self.task_types = system_task_types.copy()
+        for (custom_task_type, custom_operator) in (custom_task_types or {}).items():
+            if custom_task_type in system_task_types:
+                raise TaskTypeException("the type '%s' is already defined for the operator '%s'" % (custom_task_type, system_task_types[custom_task_type]))
+            self.task_types[custom_task_type] = custom_operator
 
     def build(self, dag_ids=None, target=None):
         """
@@ -419,7 +422,7 @@ class DAGBuilder(object):
         for dag_id in dag_ids:
             game_config = GameConfig(game=dag_id, conf=self.game_config.conf, parent=self.game_config)
             dag = DAG(dag_id, default_args=game_config.default_args)
-            self.task_config.compile_tasks(dag, game_config, self.deps_config, self.cluster_config)
+            self.task_config.compile_tasks(dag, game_config, self.deps_config, self.cluster_config, self.task_types)
             dags[dag.dag_id] = dag
 
         if target:

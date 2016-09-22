@@ -28,21 +28,21 @@ Feature: Resolve task definitions based on platforms
 
   Scenario: default and other platform given
     Given The task "my_task" is a dummy operator for profile "default" and platform "default"
-    Given The task "my_task" is a exasol operator for profile "default" and platform "ios"
+    Given The task "my_task" is a mysql operator for profile "default" and platform "ios"
     And The task "my_task" for profile "default" and platform "ios" has the argument "sql" set to "SELECT 1"
     When I build the DAGs
     Then The DAG "my_game" has the task "my_task" as a dummy operator
 
   Scenario: default and platform given
     Given The task "my_task" is a dummy operator for profile "default" and platform "default"
-    Given The task "my_task" is a exasol operator for profile "default" and platform "android"
+    Given The task "my_task" is a mysql operator for profile "default" and platform "android"
     And The task "my_task" for profile "default" and platform "android" has the argument "sql" set to "SELECT 1"
     When I build the DAGs
-    Then The DAG "my_game" has the task "my_task" as a exasol operator
+    Then The DAG "my_game" has the task "my_task" as a mysql operator
 
   Scenario: platform and other platform given
     Given The task "my_task" is a dummy operator for profile "default" and platform "android"
-    Given The task "my_task" is a exasol operator for profile "default" and platform "ios"
+    Given The task "my_task" is a mysql operator for profile "default" and platform "ios"
     And The task "my_task" for profile "default" and platform "ios" has the argument "sql" set to "SELECT 1"
     When I build the DAGs
     Then The DAG "my_game" has the task "my_task" as a dummy operator

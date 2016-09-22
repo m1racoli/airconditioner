@@ -113,21 +113,18 @@ A task in `tasks.yaml` has an identification and can be defined for multiple pro
 It is possible to have a `default` profile and a `default` platform if the task settings are the same for multiple profiles or platforms.
 
 
-The tasks settings can vary according to its type. By default, the `type` attribute is a required attributed in the task settings.
-There are multiple possible types of tasks:
+The tasks settings can vary according to its type. By default, the `type` attribute for the task type is a required attributed in the task settings.
+The following operators from Airflow are currently supported:
 
-<!--TODO: include types descriptions, or link to airflow docs, or find another solutiongit-->
+* time_sensor: TimeSensor
+* time_delta: TimeDeltaSensor
+* mysql: MySqlOperator
+* sql_sensor: SqlSensor
+* task: ExternalTaskSensor
+* bash: BashOperator
+* dummy: DummyOperator
 
-* time_sensor
-* time_delta
-* exasol
-* sleep
-* sql_sensor
-* task
-* subschedule
-* bash
-* dummy
-* none
+and furthermore is a non-existing task denoted by `none`.
 
 Example:
 ```yaml
@@ -141,6 +138,19 @@ a_task_to_calc_something:
     default:
       type: time_delta
       delta: !timedelta 2h
+```
+
+#### Custom Task Types
+
+Additional and custom operators (also defined via Airflow's plugin system)
+can be passed to the `DAGBuilder` with the `custom_task_types` argument:
+
+```
+custom_task_types = {
+  'custom': CustomOperator
+}
+
+DAGBuilder(conf=config, custom_task_types=custom_task_types).build()
 ```
 
 #### Clusters

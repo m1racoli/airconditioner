@@ -35,14 +35,14 @@ Feature: Resolve task definitions based on profiles
 
   Scenario: Resolve default when default and profile given
     Given The task "my_task" is a dummy operator for profile "default" and platform "default"
-    And The task "my_task" is a exasol operator for profile "my_profile" and platform "default"
+    And The task "my_task" is a mysql operator for profile "my_profile" and platform "default"
     When I build the DAGs
     Then The DAG "my_game" has the task "my_task" as a dummy operator
 
   Scenario: Resolve profile when default and profile given
     Given The task "my_task" is a dummy operator for profile "default" and platform "default"
-    And The task "my_task" is a exasol operator for profile "my_profile" and platform "default"
+    And The task "my_task" is a mysql operator for profile "my_profile" and platform "default"
     And The task "my_task" for profile "my_profile" and platform "default" has the argument "sql" set to "SELECT 1"
     And The game "my_game" has the profile "my_profile"
     When I build the DAGs
-    Then The DAG "my_game" has the task "my_task" as a exasol operator
+    Then The DAG "my_game" has the task "my_task" as a mysql operator
