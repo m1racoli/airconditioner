@@ -10,7 +10,6 @@ setup(
     author_email='bit-admin@wooga.com',
     description='Yaml based DAG configurator for airflow',
     install_requires=[
-        "behave",
         "pyyaml",
         "airflow",
     ],
