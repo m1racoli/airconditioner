@@ -81,6 +81,15 @@ Feature: Define and overwrite parameters
     When I build the DAGs
     Then The attribute "queue" of the task "my_task" in DAG "my_game" equals "my_queue"
 
+  Scenario: Clusters argument overwrites the default argument
+    Given The game "default" has the argument "conn_id" set as "default_conn_id"
+    And The cluster "my_cluster" for the game "my_game" has the argument "sql" set as "SELECT 1 FROM DUAL"
+    And The cluster "my_cluster" for the game "my_game" has the argument "conn_id" set as "my_conn_id"
+    And The cluster "my_cluster" has the task "my_http_task"
+    And The task "my_http_task" is a sql_sensor operator as default
+    When I build the DAGs
+    Then The attribute "conn_id" of the task "my_http_task" in DAG "my_game" equals "my_conn_id"
+
   Scenario: When start date is set on cluster and game config and cluster's is youngest, task has cluster date
     Given The game "my_game" has the argument "start_date" set as "2016-03-20"
     And The cluster "my_cluster" has a task "my_task" with the argument "start_date" set as "2016-06-15"
