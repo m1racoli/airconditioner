@@ -1,17 +1,15 @@
-import logging, re
+import logging
+import re
+import yaml
 from datetime import datetime
 from os import path
-
-import yaml
-import constructors
 import airflow.configuration
 from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators.exasol_operator import ExasolOperator
-from airflow.operators.mysql_operator import MySqlOperator
-from airflow.operators.sensors import TimeDeltaSensor, SleepSensor, SqlSensor, ExternalTaskSensor, TimeSensor
-from airflow.operators.sub_schedule_operator import SubScheduleOperator
+from airflow.operators.sensors import TimeDeltaSensor, SqlSensor, ExternalTaskSensor, TimeSensor
+
+import constructors
 
 # load YAML constructors when importing this module
 constructors.load()
@@ -198,7 +196,6 @@ class ClusterConfig(Config):
 system_task_types = {
     'time_sensor': TimeSensor,
     'time_delta': TimeDeltaSensor,
-    'mysql': MySqlOperator,
     'sql_sensor': SqlSensor,
     'task': ExternalTaskSensor,
     'bash': BashOperator,

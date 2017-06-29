@@ -35,10 +35,10 @@ Feature: Resolve task definitions based on platforms
 
   Scenario: default and platform given
     Given The task "my_task" is a dummy operator for profile "default" and platform "default"
-    Given The task "my_task" is a mysql operator for profile "default" and platform "android"
-    And The task "my_task" for profile "default" and platform "android" has the argument "sql" set to "SELECT 1"
+    Given The task "my_task" is a bash operator for profile "default" and platform "android"
+    And The task "my_task" for profile "default" and platform "android" has the argument "bash_command" set to "echo hello"
     When I build the DAGs
-    Then The DAG "my_game" has the task "my_task" as a mysql operator
+    Then The DAG "my_game" has the task "my_task" as a bash operator
 
   Scenario: platform and other platform given
     Given The task "my_task" is a dummy operator for profile "default" and platform "android"

@@ -4,11 +4,11 @@
 my_task:
   default:
     android:
-      type: mysql
-      sql:
+      type: bash
+      bash_command: echo hello
 
 my_other_task:
   default:
     android:
-      type: mysql
-      sql:
+      type: bash
+      bash_command: ehoc hello

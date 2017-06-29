@@ -19,9 +19,9 @@ Feature: Different task types
     And The task "my_task" in the DAG "my_game" is a <operator_type> operator as default
 
     Examples:
-      | task_type | operator_type | arg_name     | arg_val   |
-      | bash      | BashOperator  | bash_command | echo 'jo' |
-      | mysql     | MySqlOperator | sql          | SELECT 1  |
+      | task_type  | operator_type   | arg_name     | arg_val   |
+      | bash       | BashOperator    | bash_command | echo 'jo' |
+      | time_delta | TimeDeltaSensor | delta        | 1m        |
 
   Scenario: Task doesn't exist for platform but it's set as None (meaning it's intentional)
     Given The task "my_task" is a none operator as default
