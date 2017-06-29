@@ -1,3 +1,0 @@
-behave
--e git+https://github.com/wooga/airflow.git@master#egg=airflow
--e .
