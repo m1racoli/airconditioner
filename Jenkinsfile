@@ -2,8 +2,8 @@
 
 podTemplate(
   cloud: 'woogikube',
-  name: 'airconditioner-ci',
-  label: 'airconditioner-ci',
+  name: 'bit-ci',
+  label: 'bit-ci',
   containers: [
     containerTemplate(name: 'airflow', image: 'wooga-docker.jfrog.io/bit/airflow/base:0.1', ttyEnabled: true, command: 'cat')
   ],
@@ -11,7 +11,7 @@ podTemplate(
     secretVolume(secretName: 'pypirc', mountPath: '/home/jenkins')
   ]
 ){
-  node('airconditioner-ci'){
+  node('bit-ci'){
     container('airflow'){
       stage('Build'){
         checkout scm
