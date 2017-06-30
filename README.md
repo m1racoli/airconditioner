@@ -8,13 +8,12 @@ Currently designed and tested for Wooga's Airflow (custom version of Airflow).
 
 ## Setup
 
-    pip install -r requirements.txt
-
-To import Airconditioner from a different project, add this to its `requirements.txt`:
-
-    -e git+https://github.com/wooga/bit.airconditioner.git@master#egg=airconditioner
+    pip install -e .
 
 ## Testing
+
+    pip install -e .[dev]
+
 We use [Behave](http://pythonhosted.org/behave/) for BDD (Behavior Driven Development).
 The tests are very close to natural English defined in `.feature` files located under the `/features` directory.
 To run the tests run:
