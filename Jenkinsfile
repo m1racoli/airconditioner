@@ -11,7 +11,7 @@ podTemplate(
     secretVolume(secretName: 'pypirc', mountPath: '/home/jenkins')
   ]
 ){
-  node('airconditioner-ci'){
+  node('karajan-ci'){
     container('airflow'){
       stage('Build'){
         checkout scm
