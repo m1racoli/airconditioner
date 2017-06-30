@@ -1,8 +1,8 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='airconditioner',
-    version='0.5.0',
+    version='0.6.0',
     py_modules=['airconditioner', 'constructors'],
     url='https://github.com/wooga/bit.airconditioner',
     license='',
