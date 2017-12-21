@@ -23,6 +23,7 @@ import re
 from datetime import timedelta
 
 import yaml
+from future.utils import iteritems
 
 __timedelta_regex = re.compile(
     r'((?P<weeks>\d+?)w)?((?P<days>\d+?)d)?((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
@@ -35,7 +36,7 @@ def __timedelta_constructor(loader, node):
         return timedelta()
     parts = parts.groupdict()
     time_params = {}
-    for (name, param) in parts.iteritems():
+    for (name, param) in iteritems(parts):
         if param:
             time_params[name] = int(param)
     return timedelta(**time_params)
