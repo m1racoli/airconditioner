@@ -1,6 +1,6 @@
 # Airconditioner
 
-[![Build Status](https://travis-ci.org/wooga/airconditioner.svg?branch=master)](https://travis-ci.org/wooga/airconditioner)
+[![Build Status](https://travis-ci.com/m1racoli/airconditioner.svg?branch=master)](https://travis-ci.com/m1racoli/airconditioner)
 
 Airconditioner is an extension library to Airbnb/Apache's Airflow tool. It allows to construct the directed acyclic graphs
 (DAGs) of tasks through YAML description files. This provides a more user-friendly and less repetitive interface for creating new DAGs.
