@@ -37,6 +37,10 @@ setup(
         "apache-airflow~=1.8",
     ],
     extras_require={
-        'dev': ['behave'],
+        'dev': [
+            'behave',
+            'autopep8',
+            'pylint',
+        ],
     },
 )
