@@ -42,11 +42,11 @@ clean-test: ## remove test and coverage artifacts
 install: clean
 	pip install -e .[dev]
 
-init: install # for backwards compatibility
+sdist: clean
+	python setup.py sdist
 
-release: clean
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+upload: sdist
+	twine upload dist/*
 
 test:
 	behave

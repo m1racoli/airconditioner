@@ -2,3 +2,4 @@
 *.egg-info/
 src/
 unittests.cfg
+dist/
