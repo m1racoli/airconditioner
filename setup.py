@@ -21,9 +21,11 @@
 
 from setuptools import setup
 
+__version__ = '0.8.0'
+
 setup(
     name='airconditioner',
-    version='0.8.0',
+    version=__version__,
     py_modules=['airconditioner', 'constructors'],
     url='https://github.com/wooga/airconditioner',
     license='MIT',
