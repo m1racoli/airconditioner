@@ -35,24 +35,24 @@ Feature: Check conversion from date to datetime from the yamls to the dags
     Given The game "my_game" has the argument "start_date" set as "2016-03-20"
     When I build the DAGs
     Then The DAG "my_game" has the task "my_task"
-    Then The attribute "start_date" of the task "my_task" in DAG "my_game" is of type "datetime"
+    Then The attribute "start_date" of the task "my_task" in DAG "my_game" is of type "Pendulum"
 
   Scenario: End date on game config
     Given The game "my_game" has the argument "end_date" set as "2016-03-20"
     When I build the DAGs
     Then The DAG "my_game" has the task "my_task"
-    Then The attribute "end_date" of the task "my_task" in DAG "my_game" is of type "datetime"
+    Then The attribute "end_date" of the task "my_task" in DAG "my_game" is of type "Pendulum"
 
   Scenario: Start date on cluster config
     Given The cluster "my_cluster" for the game "my_game" has the argument "start_date" set as "2016-03-20"
     When I build the DAGs
     Then The DAG "my_game" has the task "my_task"
-    Then The attribute "start_date" of the task "my_task" in DAG "my_game" is of type "datetime"
+    Then The attribute "start_date" of the task "my_task" in DAG "my_game" is of type "Pendulum"
 
   Scenario: End date on cluster config
     Given The cluster "my_cluster" for the game "my_game" has the argument "end_date" set as "2016-03-20"
     When I build the DAGs
     Then The DAG "my_game" has the task "my_task"
-    Then The attribute "end_date" of the task "my_task" in DAG "my_game" is of type "datetime"
+    Then The attribute "end_date" of the task "my_task" in DAG "my_game" is of type "Pendulum"
 
 
