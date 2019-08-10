@@ -20,5 +20,7 @@
 # SOFTWARE.
 
 import os
+import constructors
 
 os.environ["AIRFLOW_HOME"] = "."
+constructors.load()

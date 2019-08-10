@@ -21,7 +21,6 @@
 
 from behave import *
 import yaml
-import constructors
 
 
 @given("We have an empty yaml configuration")
@@ -47,8 +46,7 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    constructors.load()
-    context.yaml_config = yaml.load(context.yaml_config)
+    context.yaml_config = yaml.load(context.yaml_config, Loader=yaml.Loader)
 
 
 @then('The type of "{key}" is a "{value_type}"')

@@ -3,3 +3,4 @@
 src/
 unittests.cfg
 dist/
+logs

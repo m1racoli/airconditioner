@@ -62,7 +62,7 @@ class Config(object):
 
     @classmethod
     def __load(cls, file_path):
-        return yaml.load(open(file_path, 'r'))
+        return yaml.load(open(file_path, 'r'), Loader=yaml.Loader)
 
     def __init__(self, yaml_path=None, file_name=None, conf=None):
         """

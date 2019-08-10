@@ -18,14 +18,14 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import sys
 from datetime import datetime
 
-import sys
 import yaml
-from airflow.models import BaseOperator
 from behave import *
 
 from airconditioner import DAGBuilder, system_task_types
+from airflow.models import BaseOperator
 
 
 def assert_equals(actual, expected):
@@ -71,14 +71,14 @@ def step_impl(context):
 @when(u'I build the DAGs')
 def step_impl(context):
     yaml_string = yaml.safe_dump(context.dag_config, default_style='"').replace('"', '')
-    config = yaml.load(yaml_string)
+    config = yaml.load(yaml_string, Loader=yaml.Loader)
     context.dags = DAGBuilder(conf=config).build()
 
 
 @when(u'I try to build the DAGs')
 def step_impl(context):
     yaml_string = yaml.safe_dump(context.dag_config, default_style='"').replace('"', '')
-    config = yaml.load(yaml_string)
+    config = yaml.load(yaml_string, Loader=yaml.Loader)
     try:
         context.dags = DAGBuilder(conf=config).build()
     except Exception:
@@ -89,7 +89,7 @@ def step_impl(context):
 @when(u'I try to build the DAGs with custom task types')
 def step_impl(context):
     yaml_string = yaml.safe_dump(context.dag_config, default_style='"').replace('"', '')
-    config = yaml.load(yaml_string)
+    config = yaml.load(yaml_string, Loader=yaml.Loader)
     try:
         context.dags = DAGBuilder(conf=config, custom_task_types=context.custom_task_types).build()
     except Exception:
@@ -506,7 +506,7 @@ def step_impl(context, dag_ids):
     """
     dag_ids = dag_ids.split(',')
     yaml_string = yaml.safe_dump(context.dag_config, default_style='"').replace('"', '')
-    config = yaml.load(yaml_string)
+    config = yaml.load(yaml_string, Loader=yaml.Loader)
     context.dags = DAGBuilder(conf=config).build(dag_ids=dag_ids)
 
 
