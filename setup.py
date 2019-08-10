@@ -27,10 +27,10 @@ setup(
     name='airconditioner',
     version=__version__,
     py_modules=['airconditioner', 'constructors'],
-    url='https://github.com/wooga/airconditioner',
+    url='https://github.com/m1racoli/airconditioner',
     license='MIT',
     author='Cedrik Neumann',
-    author_email='cedrik.neumann@outlook.com',
+    author_email='contact@m1racoli.io',
     description='Yaml based DAG configurator for airflow',
     install_requires=[
         "pyyaml",
