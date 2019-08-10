@@ -41,7 +41,10 @@ setup(
             'behave',
             'autopep8',
             'pylint',
-            'python-semantic-release',
+
         ],
+        'publish': [
+            'python-semantic-release',
+        ]
     },
 )
